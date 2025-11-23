@@ -1,0 +1,6 @@
+timestamp,log_source,channel,event_code,action,auth_package,src_host,src_ip,domain,user,service_account,spn,ticket_encryption_type,status
+2025-10-26T09:14:12+02:00,DC-01.datahaven.local,Security,4769,Kerberos Service Ticket Requested,Kerberos,WS-072.datahaven.local,10.2.14.57,DATAHAVEN,DATAHAVEN\kristin.hansen,DATAHAVEN\svc_sql,MSSQLSvc/sql01.datahaven.local:1433,0x17 (rc4-hmac),SUCCESS
+2025-10-26T09:14:18+02:00,DC-01.datahaven.local,Security,4769,Kerberos Service Ticket Requested,Kerberos,WS-072.datahaven.local,10.2.14.57,DATAHAVEN,DATAHAVEN\kristin.hansen,DATAHAVEN\svc_exchange,ldap/exchange01.datahaven.local,0x17 (rc4-hmac),SUCCESS
+2025-10-26T09:14:26+02:00,DC-01.datahaven.local,Security,4769,Kerberos Service Ticket Requested,Kerberos,WS-072.datahaven.local,10.2.14.57,DATAHAVEN,DATAHAVEN\kristin.hansen,DATAHAVEN\svc_web,HTTP/intranet.datahaven.local,0x17 (rc4-hmac),SUCCESS
+2025-10-26T09:34:20+02:00,DC-01.datahaven.local,Security,4768,Kerberos Authentication Ticket Requested (TGT),Kerberos,WS-072.datahaven.local,10.2.14.57,DATAHAVEN,DATAHAVEN\svc_sql,,,0x12 (aes256-cts-hmac-sha1-96),SUCCESS
+2025-10-26T09:34:27+02:00,sql01.datahaven.local,Security,4624,An account was successfully logged on,Kerberos,WS-072.datahaven.local,10.2.14.57,DATAHAVEN,DATAHAVEN\svc_sql,,,,SUCCESS

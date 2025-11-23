@@ -1,0 +1,188 @@
+/* === Site-wide visuals only === */
+:root {
+  --bg:#ffffff; --ink:#0b0f14; --muted:#6b7280; --line:#e5e7eb; --hover:#f8fafc; --sel:#dbeafe; --brand:#111827;
+}
+@media (prefers-color-scheme: dark){
+  :root {
+    --bg:#0b0f14; --ink:#e5e7eb; --muted:#9aa4b2; --line:#1f2937; --hover:#0f172a; --sel:#0b2948;
+    --brand:#111827; /* was #e5e7eb */
+  }
+}
+
+@media (prefers-color-scheme: dark){
+  :root {
+    --bg:#0b0f14; --ink:#e5e7eb; --muted:#9aa4b2; --line:#1f2937; --hover:#0f172a; --sel:#0b2948;
+    --brand:#111827; /* was #e5e7eb */
+  }
+}
+@media (prefers-color-scheme: dark){
+   :root { --bg:#0b0f14; --ink:#e5e7eb; --muted:#9aa4b2; --line:#1f2937; --hover:#0f172a; --sel:#0b2948; --brand:#111827; }
+ }
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans"}
+a{color:inherit;text-decoration:none}
+
+/* Layout containers */
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+main{padding:16px}
+
+/* Header (unified across pages) */
+header{
+  position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:14px 16px;z-index:10
+}
+.logo a{display:inline-block;padding:6px 10px;border-radius:10px;font-weight:800}
+.logo a:hover{background:var(--hover)}
+.page-title{margin:0;font-size:1rem;color:var(--muted);line-height:1}
+
+/* Buttons */
+.btn{
+  appearance:none;border:1px solid var(--line);background:var(--brand);color:#fff;
+  padding:.55rem .9rem;border-radius:10px;font-weight:700;cursor:pointer;font-size:.95rem
+}
+.btn.secondary{background:transparent;color:var(--ink);font-weight:600}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+
+/* Cards, grids, text helpers */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:12px;padding:14px;background:transparent}
+.card h3{margin:.25rem 0 .5rem;font-size:1rem}
+.muted{color:var(--muted);font-size:.9rem}
+code{background:rgba(127,127,127,.12);padding:.2rem .35rem;border-radius:.35rem}
+
+/* Logs page monospace rows & table */
+.row{
+  white-space:pre;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+  font-size:13px;padding:6px 12px;border-bottom:1px solid var(--line);user-select:text;cursor:pointer
+}
+.row:hover{background:var(--hover)}
+.selected{background:var(--sel)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{
+  position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);
+  text-align:left;padding:8px 10px
+}
+tbody td{
+  border-bottom:1px solid var(--line);padding:6px 10px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace
+}
+
+/* Forms (analysis page) */
+label{display:block;font-weight:600;margin:1rem 0 .5rem}
+textarea,input[type="text"]{
+  width:100%;padding:.75rem;border-radius:.5rem;border:1px solid var(--line);
+  background:transparent;color:inherit
+}
+.actions{display:flex;align-items:center;gap:.5rem}
+
+
+/* 1) Strong normalization so native buttons aren't white */
+button,
+input[type="button"],
+input[type="submit"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--brand) !important;
+  color: #fff !important;
+  border: 1px solid var(--line) !important;
+  padding: .55rem .9rem !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-size: .95rem !important;
+  cursor: pointer;
+}
+
+/* 2) Treat ANY card CTA (even bare links) as a themed button */
+.grid .card a[href],
+.card a[href],
+.card button,
+.card input[type="button"],
+.card input[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  text-decoration: none;
+  background: var(--brand);
+  color: #fff;
+  border: 1px solid var(--line);
+  padding: .55rem .9rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: .95rem;
+}
+
+/* Hover/focus for both */
+.grid .card a[href]:hover,
+.card a[href]:hover,
+.card button:hover,
+.card input[type="button"]:hover,
+.card input[type="submit"]:hover,
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover {
+  filter: brightness(1.06);
+}
+.grid .card a[href]:focus-visible,
+.card a[href]:focus-visible,
+.card button:focus-visible,
+.card input[type="button"]:focus-visible,
+.card input[type="submit"]:focus-visible,
+button:focus-visible,
+input[type="button"]:focus-visible,
+input[type="submit"]:focus-visible {
+  outline: 2px solid var(--muted);
+  outline-offset: 2px;
+}
+
+/* Secondary stays subtle anywhere it's used */
+button.secondary,
+input.secondary,
+a.btn.secondary,
+.btn.secondary {
+  background: transparent !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+
+/* Logs: force the "Next" button to use primary styling */
+#btnNext,
+button#btnNext,
+input#btnNext {
+  background: var(--brand) !important;
+  color: #fff !important;
+  border: 1px solid var(--line) !important;
+  padding: .55rem .9rem !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-size: .95rem !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none !important;
+}
+
+/* In case it was given the 'secondary' class by mistake */
+#btnNext.secondary {
+  background: var(--brand) !important;
+  color: #fff !important;
+  border-color: var(--line) !important;
+}
+
+/* Hover/focus/disabled */
+#btnNext:hover { filter: brightness(1.06); }
+#btnNext:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
+#btnNext:disabled { opacity: .6; cursor: not-allowed; filter: none; }
+
+/* Logs pages: make container full-width without changing other pages */
+.wrap:has(#tableView),
+.wrap:has(#rows) {
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+main:has(#tableView),
+main:has(#rows) {
+  padding: 0;
+}

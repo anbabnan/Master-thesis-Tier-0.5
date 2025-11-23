@@ -1,0 +1,192 @@
+[
+  {
+    "Customer": {
+      "name": "DataHaven Solutions",
+      "email": "SOC@datahaven.no",
+      "phone_number": "+47 012 34 568",
+      "escalation_contact": "DataHaven SOC",
+      "mdr_contract_type": "EDR",
+      "important_info": ""
+    },
+    "type": "dataexfil",
+    "alert_id": "ALRT-2025-10-20-DATAEXFIL-001",
+    "detected_time": "2025-10-29T08:37:08+00:00",
+    "alert_name": "Suspected Data Exfiltration to Dropbox",
+    "severity": "Medium",
+    "status": "New",
+    "category": "Data Exfiltration/Theft",
+    "source": "Multi-source Correlation Engine",
+    "metadata": {
+      "correlation_rule": "DataExfiltration_Dropbox_Rclone_Correlation",
+      "investigation_tier": 1,
+      "alert_origin": [
+        "Exchange",
+        "ExchangeDLP",
+        "ExchangeTransport",
+        "M365 Defender",
+        "EDR",
+        "MDCA",
+        "Netflow",
+        "UEBA"
+      ],
+      "confidence_score": 0.9,
+      "num_linked_events": 25,
+      "first_event_time": "2025-10-29T06:20:00+00:00",
+      "last_event_time": "2025-10-29T08:37:08+00:00"
+    },
+    "entities": {
+      "user": "lars.haugen@datahaven.no",
+      "source_ips": ["84.213.57.42"],
+      "dest_domains": ["dropbox.com"],
+      "ioc_list": [
+        "Client_Contracts_Archive.zip",
+        "Client_Contracts_Archive_pwd.zip",
+        "Process: rclone.exe",
+        "Q3_Financials.xlsx"
+      ]
+    },
+    "indicators": [
+      {
+        "type": "DLP.Inspect",
+        "timestamp": "2025-10-29T06:23:15+00:00",
+        "details": {
+          "user": "lars.haugen@datahaven.no",
+          "file_name": null,
+          "policy_name": "DLP policy 'Confidential-Finance' evaluated: Sensitive PII and large files detected (contracts, financials).",
+          "action": "evaluated"
+        }
+      },
+      {
+        "type": "DLP.Alert",
+        "timestamp": "2025-10-29T06:25:00+00:00",
+        "details": {
+          "user": "lars.haugen@datahaven.no",
+          "file_name": null,
+          "policy_name": "Repeated outbound delivery attempts blocked. Policy threshold exceeded (sensitivity + volume).",
+          "action": "blocked"
+        }
+      },
+      {
+        "type": "CloudAppDiscovery.Access",
+        "timestamp": "2025-10-29T07:49:12+00:00",
+        "details": {
+          "user": "lars.haugen@datahaven.no",
+          "src_ip": "84.213.57.42",
+          "bytes": null,
+          "description": "Cloud Discovery identified unsanctioned app Dropbox accessed from managed device."
+        }
+      },
+      {
+        "type": "CloudAppDiscovery.Access",
+        "timestamp": "2025-10-29T07:50:00+00:00",
+        "details": {
+          "user": "lars.haugen@datahaven.no",
+          "src_ip": "84.213.57.42",
+          "bytes": null,
+          "description": "Cloud Discovery identified unsanctioned app Dropbox accessed from managed device."
+        }
+      },
+      {
+        "type": "App.Authenticate",
+        "timestamp": "2025-10-29T07:59:00+00:00",
+        "details": {
+          "user": "lars.haugen@datahaven.no",
+          "src_ip": "84.213.57.42",
+          "bytes": null,
+          "description": "Successful login to Dropbox Web via OAuth; User-Agent=Chrome/119; SSO=Disabled"
+        }
+      },
+      {
+        "type": "CASB.InferredUpload",
+        "timestamp": "2025-10-29T08:03:00+00:00",
+        "details": {
+          "user": "lars.haugen@datahaven.no",
+          "src_ip": "84.213.57.42",
+          "bytes": 151772593.0,
+          "description": "CASB detected abnormal outbound data volume to unsanctioned app Dropbox. Approx. 144 MB uploaded from WIN10-DH-113."
+        }
+      },
+      {
+        "type": "CASB.InferredUpload",
+        "timestamp": "2025-10-29T08:10:17+00:00",
+        "details": {
+          "user": "lars.haugen@datahaven.no",
+          "src_ip": "84.213.57.42",
+          "bytes": 1181116003.0,
+          "description": "CASB detected large outbound transfer (≈1.1 GB) to Dropbox via rclone process. TLS SNI=content.dropboxapi.com."
+        }
+      },
+      {
+        "type": "CASB.InferredUpload",
+        "timestamp": "2025-10-29T08:12:44+00:00",
+        "details": {
+          "user": "lars.haugen@datahaven.no",
+          "src_ip": "84.213.57.42",
+          "bytes": 60709037.0,
+          "description": "CASB detected abnormal outbound data volume to unsanctioned app Dropbox. Approx. 57 MB uploaded from WIN10-DH-113."
+        }
+      },
+      {
+        "type": "CASB.InferredUpload",
+        "timestamp": "2025-10-29T08:16:08+00:00",
+        "details": {
+          "user": "lars.haugen@datahaven.no",
+          "src_ip": "84.213.57.42",
+          "bytes": 105698770.0,
+          "description": "CASB detected abnormal outbound data volume to unsanctioned app Dropbox. Approx. 100 MB uploaded from WIN10-DH-113."
+        }
+      },
+      {
+        "type": "CASB.InferredUpload",
+        "timestamp": "2025-10-29T08:19:24+00:00",
+        "details": {
+          "user": "lars.haugen@datahaven.no",
+          "src_ip": "84.213.57.42",
+          "bytes": 217902080.0,
+          "description": "CASB detected abnormal outbound data volume to unsanctioned app Dropbox. Approx. 207 MB uploaded from WIN10-DH-113."
+        }
+      },
+      {
+        "type": "Anomaly.UploadVolumeSpike",
+        "timestamp": "2025-10-29T08:27:08+00:00",
+        "details": {
+          "user": "lars.haugen@datahaven.no",
+          "src_ip": "84.213.57.42",
+          "bytes": 1181116003.0,
+          "description": "Defender for Cloud Apps detected upload volume significantly higher than baseline to unsanctioned app."
+        }
+      },
+      {
+        "type": "Netflow_Summary",
+        "timestamp": "2025-10-29T08:35:08+00:00",
+        "details": {
+          "src_ip": "84.213.57.42",
+          "bytes": null,
+          "note": "Network telemetry confirms egress traffic to Dropbox IP range (AS19679)."
+        }
+      },
+      {
+        "type": "Process_Create",
+        "timestamp": "2025-10-29T07:48:33+00:00",
+        "details": {
+          "process": "rclone.exe",
+          "description": "Process 'rclone.exe' executed with command line: rclone copy C:\\Users\\Lars\\Documents\\Finance\\ dropbox:/Finance_Backup --transfers 4"
+        }
+      }
+    ],
+    "notes": "Synchronized to match CSV logs for lars.haugen@datahaven.no. Observed DLP events, CASB inferred uploads to Dropbox, netflow summaries, and rclone process execution. Window: 2025-10-29T06:20:00+00:00 → 2025-10-29T08:37:08+00:00. Primary source IP: 84.213.57.42.",
+    "linked_alerts": [
+      "DLP-ALRT-7701-linked",
+      "Exchange-linked",
+      "ExchangeDLP-linked",
+      "ExchangeTransport-linked",
+      "Informational-linked",
+      "M365 Defender-linked",
+      "MDCA-ALRT-94827-linked",
+      "MDCA-ALRT-94861-linked",
+      "MDCA-ALRT-94902-linked",
+      "MDCA-linked",
+      "Medium-linked"
+    ]
+  }
+]

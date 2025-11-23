@@ -1,0 +1,305 @@
+[
+   {
+  "Customer": {
+    "name": "DataHaven Solutions",
+    "email": "SOC@datahaven.no",
+    "phone_number": "+47 012 34 568",
+    "escalation_contact": "DataHaven SOC",
+    "mdr_contract_type": "EDR",
+    "important_info": ""
+  }
+},
+  {
+    "type": "aitm",
+    "alert_id": "ALRT-2025-10-27-PHISH-001",
+    "detected_time": "2025-10-28T08:12:10+00:00",
+    "alert_name": "Successful AiTM Phishing",
+    "severity": "High",
+    "status": "New",
+    "category": "Potential Phishing",
+    "source": "EmailGateway",
+    "metadata": {
+      "correlation_rule": "Phish_Spoof_M365_Delivery",
+      "investigation_tier": 1,
+      "alert_origin": [
+        "EmailGateway"
+      ],
+      "confidence_score": 0.75,
+      "num_linked_events": 1,
+      "first_event_time": "2025-10-28T08:12:10+00:00",
+      "last_event_time": "2025-10-28T08:12:10+00:00"
+    },
+    "entities": {
+      "user": "erik.nilsen@datahaven.no",
+      "source_ips": [
+        "89.185.80.19"
+      ],
+      "domains": [],
+      "ioc_list": []
+    },
+    "indicators": [
+      {
+        "type": "PhishingEmailDelivered",
+        "timestamp": "2025-10-28T08:12:10+00:00",
+        "details": {
+          "sender": "",
+          "subject": "",
+          "recipient": "erik.nilsen@datahaven.no"
+        }
+      }
+    ],
+    "notes": "Spoofed brand indicators present or suspicious sender; delivered to user with external link.",
+    "linked_alerts": []
+  },
+  {
+    "alert_id": "ALRT-2025-10-27-PHISH-CLICK-002",
+    "detected_time": "2025-10-28T08:13:50+00:00",
+    "alert_name": "Web Proxy: Possible Credential Submission to Reverse Proxy (AiTM)",
+    "severity": "High",
+    "status": "New",
+    "category": "Web / Credential capture",
+    "source": "WebProxy",
+    "metadata": {
+      "correlation_rule": "AiTM_Proxy_Credential_Post",
+      "investigation_tier": 1,
+      "alert_origin": [
+        "ProxyHTTP",
+        "DNS"
+      ],
+      "confidence_score": 0.88,
+      "num_linked_events": 2,
+      "first_event_time": "2025-10-28T08:12:35+00:00",
+      "last_event_time": "2025-10-28T08:13:50+00:00"
+    },
+    "entities": {
+      "user": "erik.nilsen@datahaven.no",
+      "source_ips": [
+        "89.185.80.19",
+        "85.214.12.99"
+      ],
+      "domains": [],
+      "ioc_list": [
+        "89.185.80.19",
+        "85.214.12.99",
+        "52.96.0.0"
+      ]
+    },
+    "indicators": [
+      {
+        "type": "UserClickedPhishingLink",
+        "timestamp": "2025-10-28T08:12:35+00:00",
+        "details": {
+          "client_ip": "10.4.23.87",
+          "url": "",
+          "user_agent": ""
+        }
+      },
+      {
+        "type": "CredentialPOSTedToProxy",
+        "timestamp": "2025-10-28T08:13:50+00:00",
+        "details": {
+          "proxy_ip": "10.4.23.87",
+          "ua": "",
+          "body": "[redacted]"
+        }
+      }
+    ],
+    "notes": "Web proxy/DNS telemetry indicates click activity with possible credential post to an AiTM endpoint.",
+    "linked_alerts": [
+      "ALRT-2025-10-27-PHISH-001",
+      "ALRT-2025-10-27-PHISH-001"
+    ]
+  },
+  {
+    "alert_id": "ALRT-2025-10-27-AITM-003",
+    "detected_time": "2025-10-27T11:25:00+00:00",
+    "alert_name": "Correlation: Possible AiTM Credential Replay and Non-browser Login",
+    "severity": "High",
+    "status": "New",
+    "category": "Credential-based attack / Identity compromise",
+    "source": "Multi-stage correlation engine",
+    "metadata": {
+      "correlation_rule": "AiTM_Phish_Credential_Replay",
+      "investigation_tier": 1,
+      "alert_origin": [
+        "ProxyHTTP",
+        "AzureAD",
+        "WebProxy"
+      ],
+      "confidence_score": 0.94,
+      "num_linked_events": 2,
+      "first_event_time": "2025-10-27T11:25:00+00:00",
+      "last_event_time": "2025-10-27T11:25:00+00:00"
+    },
+    "entities": {
+      "user": "erik.nilsen@datahaven.no",
+      "source_ips": [
+        "89.185.80.19"
+      ],
+      "domains": [],
+      "ioc_list": [
+        "89.185.80.19",
+        "Axios/1.7.9"
+      ]
+    },
+    "indicators": [
+      {
+        "type": "IdPLogin",
+        "timestamp": "2025-10-27T11:25:00+00:00",
+        "details": {
+          "user": "erik.nilsen@datahaven.no",
+          "ip": "10.4.23.87",
+          "user_agent": "Axios/1.7.9",
+          "status": "Success",
+          "clientapp": "Microsoft Graph"
+        }
+      }
+    ],
+    "notes": "Non-browser/scripted UA used shortly after credential capture; consistent with automated replay.",
+    "linked_alerts": [
+      "ALRT-2025-10-27-PHISH-CLICK-002",
+      "ALRT-2025-10-27-PHISH-CLICK-002"
+    ]
+  },
+  {
+    "alert_id": "ALRT-2025-10-27-MAILRULE-004",
+    "detected_time": "2025-10-28T08:26:20+00:00",
+    "alert_name": "ExchangeAudit: Suspicious Mailbox Rule Created",
+    "severity": "High",
+    "status": "New",
+    "category": "Mailbox manipulation / Data exfiltration",
+    "source": "ExchangeAudit",
+    "metadata": {
+      "correlation_rule": "Mailbox_Rule_Create_ExternalForwarding",
+      "investigation_tier": 2,
+      "alert_origin": [
+        "AzureAD_Audit",
+        "ExchangeAudit"
+      ],
+      "confidence_score": 0.9,
+      "num_linked_events": 1,
+      "first_event_time": "2025-10-28T08:26:20+00:00",
+      "last_event_time": "2025-10-28T08:26:20+00:00"
+    },
+    "entities": {
+      "user": "erik.nilsen@datahaven.no",
+      "source_ips": [
+        "89.185.80.19"
+      ],
+      "domains": [],
+      "ioc_list": [
+        "89.185.80.19"
+      ]
+    },
+    "indicators": [
+      {
+        "type": "MailboxRuleCreated",
+        "timestamp": "2025-10-28T08:26:20+00:00",
+        "details": {
+          "user": "erik.nilsen@datahaven.no",
+          "source_ip": "89.185.80.19",
+          "rule_name": "_finance-forward",
+          "action": "ForwardTo attacker-relay@outlook.com"
+        }
+      }
+    ],
+    "notes": "Mailbox forwarding rule created post-compromise; typical BEC control technique.",
+    "linked_alerts": [
+      "ALRT-2025-10-27-AITM-003",
+      "ALRT-2025-10-27-AITM-003"
+    ]
+  },
+  {
+    "alert_id": "ALRT-2025-10-27-EDR-005",
+    "detected_time": "2025-10-28T08:14:40+00:00",
+    "alert_name": "EDR: Suspicious Remote Download and Execution",
+    "severity": "High",
+    "status": "New",
+    "category": "Endpoint compromise / Execution",
+    "source": "EDR",
+    "metadata": {
+      "correlation_rule": "EDR_Remote_Download_Execution",
+      "investigation_tier": 2,
+      "alert_origin": [
+        "EDR",
+        "Firewall"
+      ],
+      "confidence_score": 0.88,
+      "num_linked_events": 1,
+      "first_event_time": "2025-10-28T08:14:40+00:00",
+      "last_event_time": "2025-10-28T08:14:40+00:00"
+    },
+    "entities": {
+      "host": "WIN10-DH-045",
+      "user": "erik.nilsen",
+      "source_ips": [
+        "89.185.80.19"
+      ],
+      "ioc_list": []
+    },
+    "indicators": [
+      {
+        "type": "ProcessCreation",
+        "timestamp": "2025-10-28T08:14:40+00:00",
+        "details": {
+          "device": "WIN10-DH-045",
+          "username": "erik.nilsen",
+          "process": "powershell.exe ..."
+        }
+      }
+    ],
+    "notes": "Endpoint executed remote PowerShell download from external IP observed earlier in attack chain.",
+    "linked_alerts": [
+      "ALRT-2025-10-27-AITM-003",
+      "ALRT-2025-10-27-MAILRULE-004",
+      "ALRT-2025-10-27-MAILRULE-004"
+    ]
+  },
+  {
+    "alert_id": "ALRT-2025-10-27-BEC-006",
+    "detected_time": "2025-10-28T08:14:10+00:00",
+    "alert_name": "Email: Outbound BEC Email Sent from Compromised Account",
+    "severity": "High",
+    "status": "New",
+    "category": "Business Email Compromise",
+    "source": "EmailGateway",
+    "metadata": {
+      "correlation_rule": "Outbound_Email_From_Compromised_Mailbox",
+      "investigation_tier": 2,
+      "alert_origin": [
+        "EmailGateway",
+        "ExchangeOnline"
+      ],
+      "confidence_score": 0.91,
+      "num_linked_events": 2,
+      "first_event_time": "2025-10-28T08:14:10+00:00",
+      "last_event_time": "2025-10-28T08:14:10+00:00"
+    },
+    "entities": {
+      "user": "erik.nilsen@datahaven.no",
+      "source_ips": [
+        "89.185.80.19"
+      ],
+      "domains": [],
+      "ioc_list": []
+    },
+    "indicators": [
+      {
+        "type": "OutboundEmail",
+        "timestamp": "2025-10-28T08:14:10+00:00",
+        "details": {
+          "from": "erik.nilsen@datahaven.no",
+          "to": "finance@victimcorp.no",
+          "subject": "Re: Invoice Payment - Urgent",
+          "attachment": "invoice_payment_datahaven_oct25.pdf"
+        }
+      }
+    ],
+    "notes": "Compromised account used to send fraudulent payment instruction to external recipient.",
+    "linked_alerts": [
+      "ALRT-2025-10-27-MAILRULE-004",
+      "ALRT-2025-10-27-EDR-005",
+      "ALRT-2025-10-27-EDR-005"
+    ]
+  }
+]

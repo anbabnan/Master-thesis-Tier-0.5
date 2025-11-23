@@ -1,0 +1,343 @@
+[
+  {
+    "playbook_name": "Adversary-in-the-Middle_Phishing_Attacks_Response",
+    "description": "Response playbook and alert description for Adversary-in-the-Middle (AiTM) phishing attacks.",
+    "alert_description": {
+      "description": "Adversary-in-the-Middle (AiTM) phishing is a sophisticated cyberattack in which an adversary inserts themselves between a user and a legitimate authentication service (typically via a reverse-proxy phishing site or look-alike OAuth app flow) to capturing the user’s credentials and session tokens (including session cookies) in real time. The attacker then uses the stolen session token to hijack the session without needing to re-authenticate or trigger multi-factor authentication (MFA), effectively bypassing conventional security defences. Because the login flow appears legitimate, detection is difficult, and once inside the attacker can access cloud identities, SSO-integrated applications, conduct business email compromise (BEC), lateral movement and data exfiltration under the guise of the legitimate user.",
+      "consequences": "A successful Adversary-in-the-Middle (AiTM) phishing attack can result in unauthorized interception of a valid authentication session, granting the attacker access to legitimate user credentials and session tokens. This allows the adversary to impersonate the compromised user and access cloud-hosted services, email accounts, or internal resources without triggering additional MFA challenges. Due to the attacker operating within an authenticated session, their actions blend with normal user activity, which can significantly delay detection and response. The consequences can further include potential data exfiltration, financial fraud through business email compromise (BEC), manipulation of sensitive communications, and possible privilege escalation leading to further lateral movement within the environment."
+    },
+    "recommended_actions": {
+      "containment": [
+        {
+          "action": "Disable compromised user account in Active Directory and Azure Active Directory (Entra ID)",
+          "description": "Immediately disable the compromised user account in both on-premises Active Directory and Azure Active Directory to stop ongoing access attempts using stolen credentials or tokens."
+        },
+        {
+          "action": "Revoke stolen session cookie / invalidate active sessions",
+          "description": "Force logout and invalidate all active sessions, cookies, and tokens associated with the compromised user across all connected applications and services to prevent the attacker from using it for additional malicious activity."
+        },
+        {
+          "action": "Block malicious IP address from network access",
+          "description": "Block the source IP address and any associated IP ranges used by the attacker across firewalls, proxies, and endpoint protection solutions."
+        },
+        {
+          "action": "Quarantine affected device",
+          "description": "Isolate the endpoint used by the compromised user from the corporate network until it has been fully scanned and verified clean by EDR or AV tools."
+        },
+        {
+          "action": "Notify the affected user and enforce password reset",
+          "description": "Notify the compromised user of the incident and require a secure password reset followed by MFA re-enrollment to ensure account integrity."
+        }
+      ],
+      "eradication": [
+        {
+          "action": "Investigate the incident to determine scope and impact",
+          "description": "Conduct a detailed investigation to identify how the attacker gained access, determine which accounts or devices were affected, and confirm whether lateral movement or data exfiltration occurred."
+        },
+        {
+          "action": "Identify any other affected users or devices",
+          "description": "Correlate authentication logs, device telemetry, and identity provider data to determine if additional user accounts, endpoints, or sessions have been compromised."
+        },
+        {
+          "action": "Remove malicious actors from network and restore compromised systems",
+          "description": "Eliminate any persistence mechanisms, unauthorized accounts, or malicious software introduced during the attack. Rebuild or restore affected systems to a known good state."
+        },
+        {
+          "action": "Update security policies and procedures",
+          "description": "Revise security controls and authentication procedures (especially MFA, conditional access, and email filtering policies) to prevent similar AiTM phishing attacks in the future."
+        }
+      ],
+      "recovery_and_restore": [
+        {
+          "action": "Communicate incident to stakeholders and provide protection guidance",
+          "description": "Inform key stakeholders of the incident details and remediation steps. Provide recommendations on how to strengthen protection against AiTM phishing, such as implementing phishing-resistant MFA or conditional access monitoring."
+        },
+        {
+          "action": "Monitor restored user sessions under constrained privileges",
+          "description": "Reinstate user access with reduced privileges under heightened monitoring to validate normal behavior and ensure no residual compromise remains."
+        },
+        {
+          "action": "Conduct lessons-learned review and update detection playbooks",
+          "description": "Perform a post-incident review to document findings, assess control gaps, and update SOC playbooks and detection rules to improve response readiness for similar attacks."
+        }
+      ]
+    },
+    "id": "Adversary-in-the-Middle_Phishing_Attacks_Response"
+  },
+  {
+    "playbook_name": "Data_Exfiltration_or_Theft_Response",
+    "description": "Response playbook and alert description for data exfiltration or theft incidents where sensitive data is accessed, copied or transmitted outside the organisation without authorisation.",
+    "alert_description": {
+      "description": "Data exfiltration occurs when an attacker (or malicious insider) transfers confidential, proprietary or regulated data from the organisation’s controlled environment to an external location or device without authorisation. Detection may originate from anomalous outbound network flows, large-volume file transfers, unapproved use of removable media, or DLP alerts. Because the attacker often uses valid credentials or legitimate mechanisms to move data, the activity can evade traditional defences and result in substantial business, regulatory and reputational harm.",
+      "consequences": "Successful data exfiltration or theft can lead to exposure of personally identifiable information (PII), trade secrets, intellectual property or regulated data, resulting in financial loss, regulatory fines, legal liability, erosion of stakeholder trust and competitive disadvantage. The attacker may maintain persistence, using the stolen data as leverage or continuing covert access, which increases the window of impact and complicates recovery."
+    },
+    "recommended_actions": {
+      "containment": [
+        {
+          "action": "Identify and isolate exfiltration channel",
+          "description": "Locate the mechanism used for data transfer (e.g., external file share, cloud upload, removable media) and immediately block or disable it to stop further data loss."
+        },
+        {
+          "action": "Implement rules to block detected suspicious traffic leaving the network",
+          "description": "Deploy or activate egress filtering rules, firewall or proxy controls to block known or detected outgoing channels used for data exfiltration."
+        },
+        {
+          "action": "Disable or restrict compromised accounts/credentials",
+          "description": "Revoke access for accounts identified as participating in the exfiltration, reset credentials and enforce multi-factor authentication on high-risk identities."
+        },
+        {
+          "action": "Quarantine affected systems/devices",
+          "description": "Isolate endpoints, file servers or network segments that were used in the data theft until fully scanned and verified."
+        },
+        {
+          "action": "Review the impact of the data breach based on the sensitivity of the data",
+          "description": "Assess the categories and sensitivity of the data accessed or exfiltrated (e.g., PII, IP, regulated data) to determine breach severity and next steps."
+        }
+      ],
+      "eradication": [
+        {
+          "action": "Investigate scope, root cause and affected data",
+          "description": "Perform forensic analysis to determine how the data exfiltration occurred, what data was moved, how long it has been ongoing, and which users/devices were involved."
+        },
+        {
+          "action": "Initiate contacting administration of any external platform that is now hosting copies of the breached data",
+          "description": "Identify external services or platforms where stolen or leaked data resides, engage with their administrators to secure or remove the data and coordinate take-down actions."
+        },
+        {
+          "action": "Remove malicious actors/persistence and restore systems",
+          "description": "Eliminate unauthorized tools, accounts, scripts or channels used for the theft, patch vulnerabilities, and restore impacted systems to a known good state."
+        },
+        {
+          "action": "Update policies, monitoring and preventive controls",
+          "description": "Strengthen DLP, access controls, monitoring rules, data classification and user awareness training to prevent future data theft incidents."
+        }
+      ],
+      "recovery_and_restore": [
+        {
+          "action": "Communicate incident summary and notifications",
+          "description": "Provide affected stakeholders, regulatory bodies (if necessary) and internal leadership with clear information about the breach, its impact and recommended protective actions."
+        },
+        {
+          "action": "Monitor restored environment under heightened scrutiny",
+          "description": "Re-enable user and system access with limited rights initially, apply enhanced monitoring for anomalous behaviour (such as unusual outbound transfers) until baseline is confirmed safe."
+        },
+        {
+          "action": "Conduct lessons-learned and update incident response playbook",
+          "description": "Review the timeline, detection gaps, root causes and effectiveness of the response; incorporate improvements into the organisation’s playbook, training and controls."
+        }
+      ]
+    },
+    "id": "Data_Exfiltration_or_Theft_Response"
+  },
+  {
+    "playbook_name": "Malware_Infection_Response",
+    "description": "Response playbook and alert description for incidents involving confirmed or suspected malware infections within an organization's environment.",
+    "alert_description": {
+      "description": "Malware infection incidents occur when malicious software, such as trojans, worms, ransomware or fileless malware, compromises endpoints, servers, or network devices. These infections may spread laterally, disrupt operations, exfiltrate data, or provide persistent remote access to adversaries. Detection may originate from endpoint detection and response (EDR) alerts, antivirus detections, anomalous system behaviors, or user reports. A malware infection requires rapid containment, investigation of the infection vector, and eradication of malicious artifacts to prevent further compromise.",
+      "consequences": "Malware infections can lead to loss of data integrity, service downtime, unauthorized access, and potential data exfiltration. Some malware variants enable adversaries to escalate privileges, deploy additional payloads, or initiate ransomware encryption events. Left unchecked, these infections may cause operational disruption, reputational damage, and financial loss."
+    },
+    "recommended_actions": {
+      "containment": [
+        {
+          "action": "Isolate infected hosts from the network",
+          "description": "Immediately disconnect affected endpoints or servers from the network (wired and wireless) to prevent lateral movement and further infection spread."
+        },
+        {
+          "action": "Disable shared drives and network shares",
+          "description": "Temporarily disable SMB shares, mapped drives, and shared folders to stop propagation of file-based malware."
+        },
+        {
+          "action": "Preserve volatile and forensic data",
+          "description": "Capture memory dumps, running process lists, and volatile data from infected systems before shutdown or reimaging to support investigation and attribution."
+        },
+        {
+          "action": "Block malicious IPs, domains, and file hashes",
+          "description": "Implement temporary blocks at firewalls, EDR, and mail gateways for any identified indicators of compromise (IOCs) such as malicious IPs, URLs, or file hashes."
+        },
+        {
+          "action": "Quarantine suspicious files and emails",
+          "description": "Ensure malware samples, attachments, or downloads are quarantined by AV/EDR for analysis without risk of execution."
+        },
+        {
+          "action": "Block malicious sender email addresses and update email filters",
+          "description": "If malware originated from a phishing campaign, block associated sender addresses and domains at the mail gateway and update phishing detection rules."
+        }
+      ],
+      "eradication": [
+        {
+          "action": "Do a full scan of the infected host",
+          "description": "Run a complete antivirus and EDR scan of the infected system to ensure all malware traces, secondary payloads, and hidden processes are detected and removed."
+        },
+        {
+          "action": "Perform malware analysis and determine infection vector",
+          "description": "Analyze the malware sample to identify type, persistence mechanisms, and initial infection vector (e.g., phishing, drive-by download, software exploit)."
+        },
+        {
+          "action": "Trace malware propagation path",
+          "description": "Identify whether the malware spread via SMB, shared drives, downloads, or email attachments to guide further isolation and containment steps."
+        },
+        {
+          "action": "Remove malware components and persistence mechanisms",
+          "description": "Use trusted antivirus, EDR tools, or manual analysis to remove malicious files, registry keys, scheduled tasks, services, and scripts."
+        },
+        {
+          "action": "Patch exploited vulnerabilities and update signatures",
+          "description": "Apply necessary OS, software, and firmware patches to eliminate exploited vulnerabilities; ensure AV and EDR definitions are current."
+        },
+        {
+          "action": "Scan all connected systems",
+          "description": "Conduct enterprise-wide scans to detect other potentially infected hosts or indicators of compromise related to the malware campaign."
+        },
+        {
+          "action": "Rebuild or reimage systems if necessary",
+          "description": "If infection persists or integrity cannot be guaranteed, wipe and rebuild affected systems from known-good baselines."
+        },
+        {
+          "action": "Force password resets for affected users",
+          "description": "After malware removal or system reimaging, require affected users to change all passwords and re-enroll MFA to ensure account integrity."
+        }
+      ],
+      "recovery_and_restore": [
+        {
+          "action": "Restore from verified clean backups",
+          "description": "Recover data and configurations from backups verified to be malware-free. Validate system integrity post-restoration."
+        },
+        {
+          "action": "Re-enable network connectivity and monitor for recurrence",
+          "description": "Gradually reconnect restored systems under enhanced EDR and network monitoring to ensure no residual malicious activity."
+        },
+        {
+          "action": "Notify affected users and stakeholders",
+          "description": "Inform internal teams and leadership about the incident scope, impact, and remediation steps taken. Provide guidance on phishing or safe usage awareness."
+        },
+        {
+          "action": "Conduct lessons-learned review and update detection rules",
+          "description": "Document incident timeline, root cause, and improvements. Update detection logic, email filters, and security policies to prevent similar infections."
+        },
+        {
+          "action": "Report incident to appropriate authorities if required",
+          "description": "If data compromise or regulatory thresholds are met, notify relevant authorities (e.g., CISA, regulatory bodies, or law enforcement)."
+        }
+      ]
+    },
+    "id": "Malware_Infection_Response"
+  },
+  {
+    "playbook_name": "Pass-the-Hash_Response",
+    "description": "Response playbook and alert description for incidents involving Pass-the-Hash attacks in a Windows/Active Directory environment.",
+    "alert_description": {
+      "description": "A Pass-the-Hash (PtH) attack occurs when an adversary steals a hashed credential (such as an NTLM hash) and uses it to authenticate on other systems without needing the plaintext password. This technique enables stealthy lateral movement, persistence, and privilege escalation within an enterprise network.",
+      "consequences": "Successful PtH attacks allow attackers to impersonate legitimate users, bypass authentication controls, access critical systems, move laterally, escalate privileges, and compromise the integrity of Active Directory or other enterprise resources."
+    },
+    "recommended_actions": {
+      "containment": [
+        {
+          "action": "Isolate affected host(s) from the network",
+          "description": "Disconnect the compromised machine(s) from the network to prevent further lateral movement using stolen hashes."
+        },
+        {
+          "action": "Disable or lock out affected user account(s)",
+          "description": "Temporarily disable or restrict the user credentials whose hashes may have been used to prevent further unauthorized authentication."
+        },
+        {
+          "action": "Block NTLM authentication where possible",
+          "description": "Restrict or disable NTLM usage in favor of Kerberos if supported, to reduce the attack surface for PtH."
+        },
+        {
+          "action": "Review recent authentication logs for NTLM usage and unusual logons",
+          "description": "Analyze Event IDs such as 4624, 4648, 4672 with AuthenticationPackageName=NTLM, and unusual LogonType values to identify possible PtH usage."
+        }
+      ],
+      "eradication": [
+        {
+          "action": "Identify and remove compromised credentials and hashes",
+          "description": "Locate where credential hashes were harvested (e.g., LSASS, SAM, memory), remove malicious tools or key-dumping utilities, and reset affected credentials."
+        },
+        {
+          "action": "Patch and harden systems",
+          "description": "Ensure systems are updated, apply security patches, implement credential guard, enable Windows Local Administrator Password Solution (LAPS), and reduce local admin accounts."
+        },
+        {
+          "action": "Enforce least-privilege and administrative tiering",
+          "description": "Ensure users operate with minimal privileges, separate tier-0, tier-1, tier-2 assets, and restrict administrative logons to dedicated workstations."
+        }
+      ],
+      "recovery_and_restore": [
+        {
+          "action": "Restore systems from verified clean state if required",
+          "description": "If integrity cannot be assured, reimage affected systems and restore from known-good backups."
+        },
+        {
+          "action": "Re-enable accounts and network access under monitoring",
+          "description": "Return accounts and systems to service with constrained access and heightened monitoring for anomalous NTLM logons or lateral movement."
+        },
+        {
+          "action": "Conduct lessons-learned and update detection/playbooks",
+          "description": "Review how the PtH incident occurred, revise detection rules (e.g., NTLM logons, hash dump events), update policies and train staff accordingly."
+        }
+      ]
+    },
+    "id": "Pass-the-Hash_Response"
+  },
+  {
+    "playbook_name": "Kerberoasting_Response",
+    "description": "Response playbook and alert description for incidents involving Kerberoasting attacks in an Active Directory / Kerberos environment.",
+    "alert_description": {
+      "description": "Kerberoasting attacks exploit the Kerberos protocol: an adversary with domain user access requests service tickets (TGS) for accounts with Service Principal Names (SPNs), extracts the encrypted ticket (which is encrypted with the service account’s password-derived key) and performs offline brute-force cracking of that ticket to obtain the service account’s plaintext password.",
+      "consequences": "If successful, a Kerberoasting attack grants the adversary the credentials of a service account (often privileged), enabling lateral movement, privilege escalation, and potentially full domain compromise of the Active Directory environment."
+    },
+    "recommended_actions": {
+      "containment": [
+        {
+          "action": "Isolate the host(s) requesting large numbers of TGS tickets",
+          "description": "Disconnect or segment the machine(s) from the network to halt further ticket requests or credential harvesting."
+        },
+        {
+          "action": "Disable user accounts that initiated anomalous service ticket requests",
+          "description": "Temporarily disable or lock user accounts that are requesting service tickets for many SPNs or unusual services, until investigation is complete."
+        },
+        {
+          "action": "Audit and block service accounts whose tickets are being requested anomalously",
+          "description": "Identify the targeted service accounts, block their usage and change their passwords to prevent successful credential misuse."
+        },
+        {
+          "action": "Block or restrict use of weak encryption types (e.g., RC4) for Kerberos tickets",
+          "description": "Configure Group Policy to disable RC4 and force AES128/256 ticket encryption, reducing offline cracking feasibility."
+        }
+      ],
+      "eradication": [
+        {
+          "action": "Reset passwords for all identified service accounts with SPNs",
+          "description": "Rotate passwords for service accounts with SPNs (especially those targeted or accessed) using strong, random values / gMSAs to reduce risk of offline cracking."
+        },
+        {
+          "action": "Review and remove unnecessary SPNs and delegation rights",
+          "description": "Audit Active Directory for accounts with SPNs and remove any that are not required; disable or limit unconstrained delegation."
+        },
+        {
+          "action": "Enable/expand monitoring of Kerberos ticket operations and unusual TGS requests",
+          "description": "Deploy or refine logging for Event IDs such as 4768, 4769 and monitor for unusual patterns (requests for many services, abnormal encryption types, atypical account usage)."
+        },
+        {
+          "action": "Ensure service account password complexity and expiration policies meet best-practice",
+          "description": "Enforce long, complex passwords (≥ 25 characters recommended) for service accounts, avoid weak credentials and rotate periodically."
+        }
+      ],
+      "recovery_and_restore": [
+        {
+          "action": "Restore account and service functionality under strict monitoring",
+          "description": "After remediation, re-enable user/service accounts with least privilege, monitor service ticket requests and account behaviour closely for recurrence."
+        },
+        {
+          "action": "Conduct incident review and update detection rules/playbooks",
+          "description": "Document root cause, timeline and improvements; update detection logic (e.g., anomalous TGS request volumes, encryption types), refine playbooks and train teams accordingly."
+        },
+        {
+          "action": "Communicate incident details with stakeholders and ensure awareness",
+          "description": "Provide summary of incident impact, response actions and guidance on SPN hygiene, ticket monitoring and least-privilege design to executive, technical and user teams."
+        }
+      ]
+    },
+    "id": "Kerberoasting_Response"
+  }
+]

