@@ -1,0 +1,73 @@
+Provided the following files as attachments: 
+ * Playbooks.json
+  * *_logs.csv
+  * *_alert.json
+Use all these files, and fill in the following template:  
+------------------------------------------------------------------------------------------
+Title:
+Date:
+Alert Type/Category: e.g., Attempted Compromise
+Severity: Low / Medium / High / Critical
+Analyst Name: Let this be blank, for the analyst to fill in
+Case #:
+
+# DETECTION AND ANALYSIS
+
+## Alert Summary:
+* Write an "Alert Summary" for an MDR SOC report.
+Follow these instructions exactly:
+1. Create an analysis and hypothesis of what has happened. If you decide to use any sources, keep them in the text and reference them with [X], and include a list of the sources at the end of this section, it its own section called ### References:  
+2. Begin with a single sentence describing the activity, and where the detection originated (e.g., "Microsoft Defender detected X on the host Y by the user Z."). 
+3. Provide a brief description of the attack type or tactic, max two sentences. Use internal SOC playbooks or general security knowledge to describe what the attack is and what it aims to achieve.
+4. Integrate all key findings and evidence into the summary naturally (no bullet points). Mention relevant details such as processes executed, suspicious commands, domains, user accounts, and observed behavior patterns.
+5. If any commands (especially PowerShell) are present, display them in preformatted text on a new line using triple backticks (```command```), followed by a one-sentence explanation of what the command does.
+6. Maintain a concise, professional tone without unnecessary “fluff,” such as lengthy background explanations or details on log sources.
+7. Avoid ending with a one-sentence recap of all findings. This entire section is the summary.
+8. Optionally conclude with: “We recommend that you investigate this activity further, as the activity appears to X.”
+9. The text should read like a single cohesive summary paragraph, not a list or procedural walkthrough. *
+
+## Key Details:
+*Write the "Key Details" section for an MDR SOC report.
+Follow these instructions exactly:
+1. Present each item on a separate line — no bullet points, numbering, or paragraph text.
+2. Each line should follow this consistent format:  
+   Label: Value (e.g. Host: WIN-123)
+3. Use short, descriptive labels like `User:`, `Host:`, `Source IP:`, `Destination IP:`, `Domain:`, `File Path:`, `Command Executed:`, `Process Chain:`, etc.
+4. Include ONLY the most relevant technical information from the tagged logs such as:  
+   - Impacted users, hosts, or systems  
+   - IP addresses (source/destination)  
+   - Domains, URLs, or file paths involved  
+   - PowerShell or script commands executed  
+   - Process chains observed  
+   - Event IDs
+   - Any other clear indicators of compromise (IOCs) or suspicious activity
+If multiple values exist for a single item type (such as several domains or IP addresses), you may use bullet points directly under that label to list them.
+5. Do not include where the data originated in this section (e.g., Defender, Sentinel, SIEM, etc.). Only the data itself.
+6. Keep entries factual and concise — no sentences, commentary, or explanations unless it’s a short clarification (e.g., “Encoded PowerShell command used for payload retrieval”).
+7. Maintain a consistent, clean layout with one item per line. Avoid extra spacing or markdown formatting beyond basic colons and line breaks.*
+
+## Consequence:
+*Describe the potential or confirmed impact of the incident, such as data exposure, privilege escalation, lateral movement, or system compromise. No not use bullet-points here, write as a text.
+This section should not include any containment suggestions.*
+
+# CONTAINMENT
+* This section should exclusively focus on immediate remediation actions, both that the SOC has done, and that the customer needs to do themselves*
+
+## Executed Remediation Actions:
+* Start this section with the following: "The following containment and eradication actions has been performed by our SOC:"
+1. Follow this up with a bullet point list of concrete immediate containment and eradication actions that the Tier 1 SOC analyst must do/has done in order to contain, remediate or resolve the identified threat.
+2. The immediate actions that the Tier 1 analyst can do is based on the customer contract "mdr_contract_type", and the playbook content.
+3. Be very concrete when describing what has been done. 
+4. Be brief in wording: (e.g. Isolated the host, due to X) is good enough. 
+5. If no specific actions can be performed by the SOC (e.g., for EDR customers), you may write: "No actions applicable by the MDR SOC due to customer contract."
+*
+
+## Recommended Remediation Actions:
+* Start this section with the following: "Our SOC recommends that you do the following containment actions:"
+1. Use bullet points to list out concrete immediate containment and eradication actions that the customer must do (that the SOC could not do), in order to contain, remediate or resolve the identified threat.  
+2. This should only focus on high level, immediate actions. 
+3. Do not come up with any points regarding strategy, governance and compliance, or similar, here. That is not the scope for these reports. Just concrete actions that needs to be taken.  
+4. If all remediation actions have been completed by the MDR SOC and the report is intended solely to inform the customer (e.g., for XDR customers), you may write: "All remediation actions have been completed by the MDR SOC."
+*
+-------------------------------------------------------
+The output should be in ``` ``` in Markdown. 

